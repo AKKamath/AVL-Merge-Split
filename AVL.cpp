@@ -29,15 +29,41 @@ public:
 	{
 		root = NULL;
 	}
-	AVL add(AVL tree2);
-	{
-
-	}
+	AVL add(AVL tree2);  // O(LogM + LogN) calls combine()
 	void ins(int val);   // O(LogN) calls insert()
 	void del(int val);   // O(LogN) calls delet()
 	int find(int val);   // O(LogN)
 	void disp();         // O(N) traversal, for debugging
 };
+// Assumption: All nodes of tree2 have values
+// that are <= the smallest value in tree1
+AVL::node* AVL::combine(node *tree1, node *tree2)
+{
+    if(tree1 == NULL || tree2 == NULL)
+    	return tree1;
+
+	// We have reached insertion point
+	if(tree1->left == NULL)
+	{
+		// Insert new tree
+        tree1->left = tree2;
+        // Now, new tree will have height at most Log(M)
+        // One call to checkHeights() reduces one side's height
+        // by 1 and increases other side's height by 1
+        // This loop thus runs at most Log(M) / 2 times
+        // since height of right side can be at most 1
+        while(abs(tree1->left->height - tree1->right->height) >= 2)
+			tree1 = checkHeights(tree1);
+		return tree1;
+	}
+    // Now balance rest of the tree
+    // Node at distance i from insertion point
+    // will have to call checkHeights() at most
+    // Log(M) / 2^(i + 1) times
+	while(abs(tree1->left->height - tree1->right->height) >= 2)
+		tree1 = checkHeights(tree1);
+	return tree1;
+}
 AVL::node* AVL::rotateLeft(node *n)
 {
 	if(n == NULL || n->right == NULL)
@@ -265,7 +291,11 @@ void AVL::disp()
 		q.swap(p);
 	}
 }
-
+AVL AVL::add(AVL tree2)
+{
+    root = combine(root, tree2.root);
+    return *this;
+}
 int main()
 {
 	AVL tree1, tree2;
