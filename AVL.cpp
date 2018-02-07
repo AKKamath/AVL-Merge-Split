@@ -23,10 +23,15 @@ class AVL
 	node* insert(node *, int);     // O(LogN) recursive insertion
 	node* delet(node *, int);      // O(LogN) recursive deletion
 	node* checkHeights(node *);    // Maintain balance in the force
+	node* combine(node *, node *); // Merge trees in O(LogN + LogM)
 public:
 	AVL()
 	{
 		root = NULL;
+	}
+	AVL add(AVL tree2);
+	{
+
 	}
 	void ins(int val);   // O(LogN) calls insert()
 	void del(int val);   // O(LogN) calls delet()
