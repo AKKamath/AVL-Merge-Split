@@ -2,9 +2,9 @@
 Standard implementation of AVL trees, along with special merge and split functionality.
 
 ## Base AVL Functionality
-Guaranteed logarithmic insertion time complexity.
-Guaranteed logarithmic search time complexity for a particular node.
-Guaranteed logarithmic time complexity for deletion.
+* Guaranteed logarithmic insertion time complexity.  
+* Guaranteed logarithmic search time complexity for a particular node.  
+* Guaranteed logarithmic time complexity for deletion.  
 
 ### Format
 Let N denote number of nodes present in tree.
@@ -38,7 +38,7 @@ treeName.disp();
 ## Additional Functionality
 In addition to the above, this AVL tree also supports merging and splitting. 
 
-### Merging
+### Merging, O(LogM + LogN)
 Allows for two AVL trees to be combined into a single tree.  
 Requires one tree to contain only values less than all the values in the other tree.  
 Destroys both trees in the process.  
