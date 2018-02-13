@@ -52,16 +52,25 @@ AVL::node* AVL::combine(node *tree1, node *tree2)
         // by 1 and increases other side's height by 1
         // This loop thus runs at most Log(M) / 2 times
         // since height of right side can be at most 1
-        while(abs(tree1->left->height - tree1->right->height) >= 2)
+        while((tree1->left->height >= 2 && tree1->right == NULL) || abs(tree1->left->height - tree1->right->height) >= 2)
+		{
 			tree1 = checkHeights(tree1);
+			if(tree1->right)
+				tree1->right = checkHeights(tree1->right);
+		}
 		return tree1;
 	}
+	tree1->left = combine(tree1->left, tree2);
     // Now balance rest of the tree
     // Node at distance i from insertion point
     // will have to call checkHeights() at most
     // Log(M) / 2^(i + 1) times
-	while(abs(tree1->left->height - tree1->right->height) >= 2)
+	while((tree1->left->height >= 2 && tree1->right == NULL) || abs(tree1->left->height - tree1->right->height) >= 2)
+	{
 		tree1 = checkHeights(tree1);
+		if(tree1->right)
+			tree1->right = checkHeights(tree1->right);
+	}
 	return tree1;
 }
 AVL::node* AVL::rotateLeft(node *n)
@@ -302,22 +311,37 @@ int main()
 	int opt = 0;
     do
 	{
-        cout<<"1. Insert \n2. Delete \n3. Display \n0. Exit\n";
+        cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n0. Exit\n";
         cin>>opt;
         int val;
         switch(opt)
         {
 		case 1:
             cin>>val;
-            tree.ins(val);
+            tree1.ins(val);
             break;
 		case 2:
 			cin>>val;
-			tree.del(val);
+			tree1.del(val);
 			break;
 		case 3:
-			tree.disp();
+			tree1.disp();
 			break;
+		case 4:
+			{
+                int N;
+                cout<<"Enter number of nodes in smaller tree\n";
+                cin>>N;
+                cout<<"Enter node values\n";
+                while(N)
+				{
+                    int x;
+                    cin>>x;
+                    tree2.ins(x);
+                    --N;
+				}
+                tree1.add(tree2);
+			}
         }
 	}while(opt != 0);
 	return 0;
