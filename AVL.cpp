@@ -24,7 +24,7 @@ class AVL
 	node* delet(node *, int);      // O(LogN) recursive deletion
 	node* checkHeights(node *);    // Maintain balance in the force
 	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
-	node* extractMin(node *);      // Get minimum value in O(LogN)
+	node* extractMin(node **);     // Get minimum value in O(LogN)
 public:
 	AVL()
 	{
@@ -217,8 +217,8 @@ AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 		tree2 = checkHeights(tree2);
 		return tree2;
 	}
-	mergeNode->left = tree1;
-	mergeNode->right = tree2;
+	mergeNode->left = tree2;
+	mergeNode->right = tree1;
 	mergeNode = checkHeights(mergeNode);
 	return mergeNode;
 }
@@ -226,9 +226,9 @@ AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 AVL::node* AVL::extractMin(node **tree)
 {
 	if(tree == NULL)
-		return tree;
+		return NULL;
 	// Found minimum node
-	if(tree->left == NULL)
+	if((*tree)->left == NULL)
 	{
 		// Copy details
 		node *temp = new node;
@@ -249,8 +249,8 @@ AVL::node* AVL::extractMin(node **tree)
 // Assumption: Tree2 is tree with smaller keys
 AVL AVL::add(AVL tree2)
 {
-    tree *m = extractMin(&root);
-	root = mergeWithNode(root, tree2->root, m);
+    node *m = extractMin(&root);
+	root = mergeWithNode(root, tree2.root, m);
     return *this;
 }
 AVL AVL::ins(int val)
