@@ -23,55 +23,64 @@ class AVL
 	node* insert(node *, int);     // O(LogN) recursive insertion
 	node* delet(node *, int);      // O(LogN) recursive deletion
 	node* checkHeights(node *);    // Maintain balance in the force
-	node* combine(node *, node *); // Merge trees in O(LogN + LogM)
+	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
+	node* extractMin(node *);      // Get minimum value in O(LogN)
 public:
 	AVL()
 	{
 		root = NULL;
 	}
-	AVL add(AVL tree2);  // O(LogM + LogN) calls combine()
+	AVL add(AVL tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
 	void ins(int val);   // O(LogN) calls insert()
 	void del(int val);   // O(LogN) calls delet()
 	int find(int val);   // O(LogN)
 	void disp();         // O(N) traversal, for debugging
 };
+// Get the minimum value in O(LogN)
+AVL::node* AVL::extractMin(node **tree)
+{
+	if(tree == NULL)
+		return tree;
+	// Found minimum node
+	if(tree->left == NULL)
+	{
+		// Copy details
+		node *temp = new node;
+		*temp = **tree;
+		// Remove node from tree
+		*tree = delet(*tree, (*tree)->data);
+		// Rebalance
+		*tree = checkHeights(*tree);
+		return temp;
+	}
+	// Keep moving
+	node *t = extractMin(&((*tree)->left));
+	// Rebalance
+	*tree = checkHeights(*tree);
+	return t;
+}
 // Assumption: All nodes of tree2 have values
 // that are <= the smallest value in tree1
-AVL::node* AVL::combine(node *tree1, node *tree2)
+AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 {
-    if(tree1 == NULL || tree2 == NULL)
+    if(tree1 == NULL || tree2 == NULL || mergeNode == NULL)
     	return tree1;
-
-	// We have reached insertion point
-	if(tree1->left == NULL)
+	if(tree1->height - tree2->height >= 2)
 	{
-		// Insert new tree
-        tree1->left = tree2;
-        // Now, new tree will have height at most Log(M)
-        // One call to checkHeights() reduces one side's height
-        // by 1 and increases other side's height by 1
-        // This loop thus runs at most Log(M) / 2 times
-        // since height of right side can be at most 1
-        while((tree1->left->height >= 2 && tree1->right == NULL) || abs(tree1->left->height - tree1->right->height) >= 2)
-		{
-			tree1 = checkHeights(tree1);
-			if(tree1->right)
-				tree1->right = checkHeights(tree1->right);
-		}
+		tree1->left = mergeWithNode(tree1->left, tree2, mergeNode);
+		tree1 = checkHeights(tree1);
 		return tree1;
 	}
-	tree1->left = combine(tree1->left, tree2);
-    // Now balance rest of the tree
-    // Node at distance i from insertion point
-    // will have to call checkHeights() at most
-    // Log(M) / 2^(i + 1) times
-	while((tree1->left->height >= 2 && tree1->right == NULL) || abs(tree1->left->height - tree1->right->height) >= 2)
+	else if(tree2->height - tree1->height >= 2)
 	{
-		tree1 = checkHeights(tree1);
-		if(tree1->right)
-			tree1->right = checkHeights(tree1->right);
+		tree2->right = mergeWithNode(tree1->right, tree2, mergeNode);
+		tree2 = checkHeights(tree2);
+		return tree2;
 	}
-	return tree1;
+	mergeNode->left = tree1;
+	mergeNode->right = tree2;
+	mergeNode = checkHeights(mergeNode);
+	return mergeNode;
 }
 AVL::node* AVL::rotateLeft(node *n)
 {
@@ -300,9 +309,11 @@ void AVL::disp()
 		q.swap(p);
 	}
 }
+// Assumption: Tree2 is tree with smaller keys
 AVL AVL::add(AVL tree2)
 {
-    root = combine(root, tree2.root);
+    tree *m = extractMin(&root);
+	root = mergeWithNode(root, tree2->root, m);
     return *this;
 }
 int main()
