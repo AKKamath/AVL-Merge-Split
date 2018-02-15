@@ -31,56 +31,34 @@ public:
 		root = NULL;
 	}
 	AVL add(AVL tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
-	void ins(int val);   // O(LogN) calls insert()
-	void del(int val);   // O(LogN) calls delet()
+	AVL ins(int val);    // O(LogN) calls insert()
+	AVL del(int val);    // O(LogN) calls delet()
 	int find(int val);   // O(LogN)
 	void disp();         // O(N) traversal, for debugging
 };
-// Get the minimum value in O(LogN)
-AVL::node* AVL::extractMin(node **tree)
+AVL::node* AVL::rotateRight(node *n)
 {
-	if(tree == NULL)
-		return tree;
-	// Found minimum node
-	if(tree->left == NULL)
-	{
-		// Copy details
-		node *temp = new node;
-		*temp = **tree;
-		// Remove node from tree
-		*tree = delet(*tree, (*tree)->data);
-		// Rebalance
-		*tree = checkHeights(*tree);
-		return temp;
-	}
-	// Keep moving
-	node *t = extractMin(&((*tree)->left));
-	// Rebalance
-	*tree = checkHeights(*tree);
+	if(n == NULL || n->left == NULL)
+		return n;
+	node *t = n->left;
+	n->left = t->right;
+	t->right = n;
+
+	// Set heights
+	if(n->left != NULL && n->right != NULL)
+		n->height = max(n->left->height, n->right->height) + 1;
+	else if(n->left != NULL)
+		n->height = n->left->height + 1;
+	else if(n->right != NULL)
+		n->height = n->right->height + 1;
+	else
+		n->height = 1;
+
+	if(t->left != NULL)
+		t->height = max(n->height, t->left->height) + 1;
+	else
+		t->height = n->height + 1;
 	return t;
-}
-// Assumption: All nodes of tree2 have values
-// that are <= the smallest value in tree1
-AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
-{
-    if(tree1 == NULL || tree2 == NULL || mergeNode == NULL)
-    	return tree1;
-	if(tree1->height - tree2->height >= 2)
-	{
-		tree1->left = mergeWithNode(tree1->left, tree2, mergeNode);
-		tree1 = checkHeights(tree1);
-		return tree1;
-	}
-	else if(tree2->height - tree1->height >= 2)
-	{
-		tree2->right = mergeWithNode(tree1->right, tree2, mergeNode);
-		tree2 = checkHeights(tree2);
-		return tree2;
-	}
-	mergeNode->left = tree1;
-	mergeNode->right = tree2;
-	mergeNode = checkHeights(mergeNode);
-	return mergeNode;
 }
 AVL::node* AVL::rotateLeft(node *n)
 {
@@ -106,29 +84,70 @@ AVL::node* AVL::rotateLeft(node *n)
 		t->height = n->height + 1;
 	return t;
 }
-AVL::node* AVL::rotateRight(node *n)
+AVL::node* AVL::insert(node *n, int val)
 {
-	if(n == NULL || n->left == NULL)
-		return n;
-	node *t = n->left;
-	n->left = t->right;
-	t->right = n;
-
-	// Set heights
-	if(n->left != NULL && n->right != NULL)
-		n->height = max(n->left->height, n->right->height) + 1;
-	else if(n->left != NULL)
-		n->height = n->left->height + 1;
-	else if(n->right != NULL)
-		n->height = n->right->height + 1;
-	else
+	// Create and insert node
+	if(n == NULL)
+	{
+		n = new node;
+		n->data = val;
 		n->height = 1;
+		return n;
+	}
 
-	if(t->left != NULL)
-		t->height = max(n->height, t->left->height) + 1;
+	// Insert into appropriate subtree
+	if(n->data <= val)
+		n->right = insert(n->right, val);
 	else
-		t->height = n->height + 1;
-	return t;
+		n->left = insert(n->left, val);
+
+	// Recalculate heights and rotate
+	return checkHeights(n);
+}
+AVL::node* AVL::delet(node *n, int val)
+{
+	if(n == NULL)
+	{
+		cerr<<"Node not found\n";
+		return NULL;
+	}
+	// Find and delete node
+	if(val == n->data)
+	{
+		if(n->left == NULL && n->right == NULL)
+		{
+			delete n;
+			return NULL;
+		}
+		else if(n->left == NULL)
+		{
+			node *t = n->right;
+			*n = *t;
+			delete t;
+		}
+		else if(n->right == NULL)
+		{
+			node *t = n->left;
+			*n = *t;
+			delete t;
+		}
+		else
+		{
+			node *t = n->left;
+			while(t->right != NULL)
+				t = t->right;
+			int temp = n->data;
+			n->data = t->data;
+			t->data = temp;
+			n->left = delet(n->left, val);
+		}
+	}
+	else if(val < n->data)
+		n->left = delet(n->left, val);
+	else
+		n->right = delet(n->right, val);
+	// Rebalance tree
+	return checkHeights(n);
 }
 AVL::node* AVL::checkHeights(node *n)
 {
@@ -180,79 +199,72 @@ AVL::node* AVL::checkHeights(node *n)
 	}
 	return n;
 }
-void AVL::ins(int val)
+// Assumption: All nodes of tree2 have values
+// that are <= the smallest value in tree1
+AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
+{
+    if(tree1 == NULL || tree2 == NULL || mergeNode == NULL)
+    	return tree1;
+	if(tree1->height - tree2->height >= 2)
+	{
+		tree1->left = mergeWithNode(tree1->left, tree2, mergeNode);
+		tree1 = checkHeights(tree1);
+		return tree1;
+	}
+	else if(tree2->height - tree1->height >= 2)
+	{
+		tree2->right = mergeWithNode(tree1->right, tree2, mergeNode);
+		tree2 = checkHeights(tree2);
+		return tree2;
+	}
+	mergeNode->left = tree1;
+	mergeNode->right = tree2;
+	mergeNode = checkHeights(mergeNode);
+	return mergeNode;
+}
+// Get the minimum value in O(LogN)
+AVL::node* AVL::extractMin(node **tree)
+{
+	if(tree == NULL)
+		return tree;
+	// Found minimum node
+	if(tree->left == NULL)
+	{
+		// Copy details
+		node *temp = new node;
+		*temp = **tree;
+		// Remove node from tree
+		*tree = delet(*tree, (*tree)->data);
+		// Rebalance
+		*tree = checkHeights(*tree);
+		return temp;
+	}
+	// Keep moving
+	node *t = extractMin(&((*tree)->left));
+	// Rebalance
+	*tree = checkHeights(*tree);
+	return t;
+}
+// PUBLIC FUNCTIONS
+// Assumption: Tree2 is tree with smaller keys
+AVL AVL::add(AVL tree2)
+{
+    tree *m = extractMin(&root);
+	root = mergeWithNode(root, tree2->root, m);
+    return *this;
+}
+AVL AVL::ins(int val)
 {
 	root = insert(root, val);
+	return *this;
 }
-AVL::node* AVL::insert(node *n, int val)
-{
-	// Create and insert node
-	if(n == NULL)
-	{
-		n = new node;
-		n->data = val;
-		n->height = 1;
-		return n;
-	}
 
-	// Insert into appropriate subtree
-	if(n->data <= val)
-		n->right = insert(n->right, val);
-	else
-		n->left = insert(n->left, val);
-
-	// Recalculate heights and rotate
-	return checkHeights(n);
-}
-void AVL::del(int val)
+AVL AVL::del(int val)
 {
 	root = delet(root, val);
+	return *this;
 }
-AVL::node* AVL::delet(node *n, int val)
-{
-	if(n == NULL)
-	{
-		cerr<<"Node not found\n";
-		return NULL;
-	}
-	// Find and delete node
-	if(val == n->data)
-	{
-		if(n->left == NULL && n->right == NULL)
-		{
-			delete n;
-			return NULL;
-		}
-		else if(n->left == NULL)
-		{
-			node *t = n->right;
-			*n = *t;
-			delete t;
-		}
-		else if(n->right == NULL)
-		{
-			node *t = n->left;
-			*n = *t;
-			delete t;
-		}
-		else
-		{
-			node *t = n->left;
-			while(t->right != NULL)
-				t = t->right;
-			int temp = n->data;
-			n->data = t->data;
-			t->data = temp;
-			n->left = delet(n->left, val);
-		}
-	}
-	else if(val < n->data)
-		n->left = delet(n->left, val);
-	else
-		n->right = delet(n->right, val);
-	// Rebalance tree
-	return checkHeights(n);
-}
+
 int AVL::find(int val)
 {
 	// Search tree until required value encountered
@@ -308,13 +320,6 @@ void AVL::disp()
 		sp /= 2;
 		q.swap(p);
 	}
-}
-// Assumption: Tree2 is tree with smaller keys
-AVL AVL::add(AVL tree2)
-{
-    tree *m = extractMin(&root);
-	root = mergeWithNode(root, tree2->root, m);
-    return *this;
 }
 int main()
 {
