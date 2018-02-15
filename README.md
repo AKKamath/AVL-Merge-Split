@@ -14,12 +14,12 @@ Let VAL denote some integer value.
 AVL treeName;
 ``
 - Insertion, O(LogN)  
-Returns void  
+Returns AVL  
 ``
 treeName.ins(VAL);
 ``
 - Deletion O(LogN)  
-Returns void  
+Returns AVL  
 ``
 treeName.del(VAL);
 ``
