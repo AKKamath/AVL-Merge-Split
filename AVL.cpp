@@ -7,9 +7,9 @@ class AVL
 {
 	struct node
 	{
-		int data;           // Search value
+		int data;		   // Search value
 		node *left, *right; // Pointers to children
-		int height;         // Height of subtree
+		int height;		 // Height of subtree
 		node()
 		{
 			left = NULL;
@@ -18,14 +18,14 @@ class AVL
 		}
 	};
 	node *root;
-	node* rotateRight(node *);     // O(1) right rotate function
-	node* rotateLeft(node *);      // O(1) left rotate function
-	node* insert(node *, int);     // O(LogN) recursive insertion
-	node* delet(node *, int);      // O(LogN) recursive deletion
-	node* checkHeights(node *);    // Maintain balance in the force
-	node* extractMin(node **);     // Get minimum value in O(LogN)
+	node* rotateRight(node *);	 // O(1) right rotate function
+	node* rotateLeft(node *);	  // O(1) left rotate function
+	node* insert(node *, int);	 // O(LogN) recursive insertion
+	node* delet(node *, int);	  // O(LogN) recursive deletion
+	node* checkHeights(node *);	// Maintain balance in the force
+	node* extractMin(node **);	 // Get minimum value in O(LogN)
 	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
-	void breakTree(int, node **, node **);       // Break trees along key in O(LogM + LogN)
+	void breakTree(int, node **, node **);	   // Break trees along key in O(LogM + LogN)
 public:
 	AVL()
 	{
@@ -33,10 +33,10 @@ public:
 	}
 	AVL split(int key);  // Changes calling tree to larger tree, returns smaller tree
 	AVL add(AVL tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
-	AVL ins(int val);    // O(LogN) calls insert()
-	AVL del(int val);    // O(LogN) calls delet()
+	AVL ins(int val);	// O(LogN) calls insert()
+	AVL del(int val);	// O(LogN) calls delet()
 	int find(int val);   // O(LogN)
-	void disp();         // O(N) traversal, for debugging
+	void disp();		 // O(N) traversal, for debugging
 };
 AVL::node* AVL::rotateRight(node *n)
 {
@@ -157,7 +157,7 @@ AVL::node* AVL::checkHeights(node *n)
 		return n;
 	if(n->left == NULL && n->right == NULL)
 	{
-        n->height = 1;
+		n->height = 1;
 		return n;
 	}
 	else if(n->left == NULL)
@@ -205,8 +205,8 @@ AVL::node* AVL::checkHeights(node *n)
 // that are <= the smallest value in tree1
 AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 {
-    if(tree1 == NULL || tree2 == NULL || mergeNode == NULL)
-    	return tree1;
+	if(tree1 == NULL || tree2 == NULL || mergeNode == NULL)
+		return tree1;
 	if(tree1->height - tree2->height >= 2)
 	{
 		tree1->left = mergeWithNode(tree1->left, tree2, mergeNode);
@@ -250,43 +250,43 @@ AVL::node* AVL::extractMin(node **tree)
 // Tree1 is initial tree, as well as final larger tree
 void AVL::breakTree(int key, node **tree1, node **tree2)
 {
-    if(tree1 == NULL)
-    	return;
+	if(tree1 == NULL)
+		return;
 	// Move to appropriate node
 	// then store subtree in appropriate tree
-    if(key > (*tree1)->data)
+	if(key > (*tree1)->data)
 	{
-        breakTree(key, &(*tree1)->right, tree2);
-        (*tree2) = mergeWithNode((*tree2), (*tree1)->left, (*tree1));
-        (*tree1) = (*tree1)->right;
+		breakTree(key, &(*tree1)->right, tree2);
+		(*tree2) = mergeWithNode((*tree2), (*tree1)->left, (*tree1));
+		(*tree1) = (*tree1)->right;
 	}
 	else if(key < (*tree1)->data)
 	{
-        breakTree(key, &(*tree1)->left, tree2);
-        (*tree1) = mergeWithNode((*tree1)->right, (*tree1)->left, (*tree1));
+		breakTree(key, &(*tree1)->left, tree2);
+		(*tree1) = mergeWithNode((*tree1)->right, (*tree1)->left, (*tree1));
 	}
 	else
 	{
 		node *n = (*tree1);
-        (*tree2) = (*tree1)->left;
-        (*tree1) = (*tree1)->right;
-        delete n;
+		(*tree2) = (*tree1)->left;
+		(*tree1) = (*tree1)->right;
+		delete n;
 	}
 }
 // PUBLIC FUNCTIONS
 // Returns smaller tree
 AVL AVL::split(int key)
 {
-    AVL tree2;
-    breakTree(key, &root, &tree2.root);
-    return tree2;
+	AVL tree2;
+	breakTree(key, &root, &tree2.root);
+	return tree2;
 }
 // Assumption: Tree2 is tree with smaller keys
 AVL AVL::add(AVL tree2)
 {
-    node *m = extractMin(&root);
+	node *m = extractMin(&root);
 	root = mergeWithNode(root, tree2.root, m);
-    return *this;
+	return *this;
 }
 AVL AVL::ins(int val)
 {
@@ -325,8 +325,8 @@ void AVL::disp()
 		return;
 	}
 	int sp = 1;
-    for(int i = 1; i < root->height; ++i)
-    	sp *= 2;
+	for(int i = 1; i < root->height; ++i)
+		sp *= 2;
 	queue<node *> p, q;
 	int i = 0;
 	q.push(root);
@@ -335,7 +335,7 @@ void AVL::disp()
 		while(!q.empty())
 		{
 			for(int j = 0; j < sp; ++j)
-				cout<<"    ";
+				cout<<"	";
 			if(q.front() != NULL)
 			{
 				cout<<q.front()->data<<"("<<q.front()->height<<")";
@@ -360,17 +360,17 @@ int main()
 {
 	AVL tree1, tree2;
 	int opt = 0;
-    do
+	do
 	{
-        cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n5. Split \n0. Exit\n";
-        cin>>opt;
-        int val;
-        switch(opt)
-        {
+		cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n5. Split \n0. Exit\n";
+		cin>>opt;
+		int val;
+		switch(opt)
+		{
 		case 1:
-            cin>>val;
-            tree1.ins(val);
-            break;
+			cin>>val;
+			tree1.ins(val);
+			break;
 		case 2:
 			cin>>val;
 			tree1.del(val);
@@ -380,30 +380,30 @@ int main()
 			break;
 		case 4:
 			{
-                int N;
-                cout<<"Enter number of nodes in smaller tree\n";
-                cin>>N;
-                cout<<"Enter node values\n";
-                while(N)
+				int N;
+				cout<<"Enter number of nodes in smaller tree\n";
+				cin>>N;
+				cout<<"Enter node values\n";
+				while(N)
 				{
-                    int x;
-                    cin>>x;
-                    tree2.ins(x);
-                    --N;
+					int x;
+					cin>>x;
+					tree2.ins(x);
+					--N;
 				}
-                tree1.add(tree2);
+				tree1.add(tree2);
 			}
 			break;
 		case 5:
 			{
 				int ind;
-                cout<<"Enter key to split using\n";
+				cout<<"Enter key to split using\n";
 				cin>>ind;
 				tree1.split(ind).disp();
 				tree1.disp();
 			}
 			break;
-        }
+		}
 	}while(opt != 0);
 	return 0;
 }
