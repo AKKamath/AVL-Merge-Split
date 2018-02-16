@@ -23,13 +23,15 @@ class AVL
 	node* insert(node *, int);     // O(LogN) recursive insertion
 	node* delet(node *, int);      // O(LogN) recursive deletion
 	node* checkHeights(node *);    // Maintain balance in the force
-	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
 	node* extractMin(node **);     // Get minimum value in O(LogN)
+	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
+	void breakTree(int, node **, node **);       // Break trees along key in O(LogM + LogN)
 public:
 	AVL()
 	{
 		root = NULL;
 	}
+	AVL split(int key);  // Changes calling tree to larger tree, returns smaller tree
 	AVL add(AVL tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
 	AVL ins(int val);    // O(LogN) calls insert()
 	AVL del(int val);    // O(LogN) calls delet()
@@ -245,7 +247,40 @@ AVL::node* AVL::extractMin(node **tree)
 	*tree = checkHeights(*tree);
 	return t;
 }
+// Tree1 is initial tree, as well as final larger tree
+void AVL::breakTree(int key, node **tree1, node **tree2)
+{
+    if(tree1 == NULL)
+    	return;
+	// Move to appropriate node
+	// then store subtree in appropriate tree
+    if(key > (*tree1)->data)
+	{
+        breakTree(key, &(*tree1)->right, tree2);
+        (*tree2) = mergeWithNode((*tree2), (*tree1)->left, (*tree1));
+        (*tree1) = (*tree1)->right;
+	}
+	else if(key < (*tree1)->data)
+	{
+        breakTree(key, &(*tree1)->left, tree2);
+        (*tree1) = mergeWithNode((*tree1)->right, (*tree1)->left, (*tree1));
+	}
+	else
+	{
+		node *n = (*tree1);
+        (*tree2) = (*tree1)->left;
+        (*tree1) = (*tree1)->right;
+        delete n;
+	}
+}
 // PUBLIC FUNCTIONS
+// Returns smaller tree
+AVL AVL::split(int key)
+{
+    AVL tree2;
+    breakTree(key, &root, &tree2.root);
+    return tree2;
+}
 // Assumption: Tree2 is tree with smaller keys
 AVL AVL::add(AVL tree2)
 {
@@ -327,7 +362,7 @@ int main()
 	int opt = 0;
     do
 	{
-        cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n0. Exit\n";
+        cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n5. Split \n0. Exit\n";
         cin>>opt;
         int val;
         switch(opt)
@@ -358,6 +393,16 @@ int main()
 				}
                 tree1.add(tree2);
 			}
+			break;
+		case 5:
+			{
+				int ind;
+                cout<<"Enter key to split using\n";
+				cin>>ind;
+				tree1.split(ind).disp();
+				tree1.disp();
+			}
+			break;
         }
 	}while(opt != 0);
 	return 0;
