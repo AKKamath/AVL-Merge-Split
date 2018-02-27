@@ -257,13 +257,36 @@ void AVL::breakTree(int key, node **tree1, node **tree2)
 	if(key > (*tree1)->data)
 	{
 		breakTree(key, &(*tree1)->right, tree2);
-		(*tree2) = mergeWithNode((*tree2), (*tree1)->left, (*tree1));
+		if((*tree2) != NULL)
+			(*tree2) = mergeWithNode((*tree2), (*tree1)->left, (*tree1));
+		else
+		{
+			(*tree2) = (*tree1)->left;
+			insert((*tree2), (*tree1)->data);
+			delete (*tree1);
+		}
 		(*tree1) = (*tree1)->right;
 	}
 	else if(key < (*tree1)->data)
 	{
 		breakTree(key, &(*tree1)->left, tree2);
-		(*tree1) = mergeWithNode((*tree1)->right, (*tree1)->left, (*tree1));
+		if((*tree1)->left != NULL && (*tree1)->right != NULL)
+			(*tree1) = mergeWithNode((*tree1)->right, (*tree1)->left, (*tree1));
+		else
+		{
+			if((*tree1)->left == NULL)
+			{
+				int val = (*tree1)->data;
+				(*tree1) = (*tree1)->right;
+				insert((*tree1), val);
+			}
+			else if((*tree1)->right == NULL)
+			{
+				int val = (*tree1)->data;
+				(*tree1) = (*tree1)->left;
+				insert((*tree1), val);
+			}
+		}
 	}
 	else
 	{
@@ -353,7 +376,7 @@ void AVL::disp()
 		cout<<"\n";
 		++i;
 		sp /= 2;
-		q.swap(p);
+		swap(q,p);
 	}
 }
 int main()
