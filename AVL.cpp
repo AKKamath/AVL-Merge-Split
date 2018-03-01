@@ -231,7 +231,7 @@ AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 	}
 	else if(tree2->height - tree1->height >= 2)
 	{
-		tree2->right = mergeWithNode(tree1->right, tree2, mergeNode);
+		tree2->right = mergeWithNode(tree1, tree2->right, mergeNode);
 		tree2 = checkHeights(tree2);
 		return tree2;
 	}
