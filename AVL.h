@@ -2,12 +2,14 @@
 #include <iostream>
 #include <queue>
 using namespace std;
-#define TYPE int
+#ifndef AVL_H
+#define AVL_H
+template <class T>
 class AVL
 {
 	struct node
 	{
-		TYPE data;		   // Search value
+		T data;		   // Search value
 		node *left, *right; // Pointers to children
 		int height;		 // Height of subtree
 		node()
@@ -18,27 +20,28 @@ class AVL
 		}
 	};
 	node *root;
-	node* rotateRight(node *);	 // O(1) right rotate function
-	node* rotateLeft(node *);	  // O(1) left rotate function
-	node* insert(node *, TYPE);	 // O(LogN) recursive insertion
-	node* delet(node *, TYPE);	  // O(LogN) recursive deletion
-	node* checkHeights(node *);	// Maintain balance in the force
-	node* extractMin(node **);	 // Get minimum value in O(LogN)
+	node* rotateRight(node *);    // O(1) right rotate function
+	node* rotateLeft(node *);     // O(1) left rotate function
+	node* insert(node *, T);      // O(LogN) recursive insertion
+	node* delet(node *, T);       // O(LogN) recursive deletion
+	node* checkHeights(node *);   // Maintain balance in the force
+	node* extractMin(node **);    // Get minimum value in O(LogN)
 	node* mergeWithNode(node *, node *, node *); // Merge trees in O(LogN + LogM)
-	void breakTree(TYPE, node **, node **);	   // Break trees along key in O(LogM + LogN)
+	void breakTree(T, node **, node **);         // Break trees along key in O(LogM + LogN)
 public:
 	AVL()
 	{
 		root = NULL;
 	}
-	AVL split(TYPE key);  // Changes calling tree to larger tree, returns smaller tree
-	AVL add(AVL tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
-	AVL ins(TYPE val);	// O(LogN) calls insert()
-	AVL del(TYPE val);	// O(LogN) calls delet()
-	TYPE find(TYPE val);   // O(LogN)
-	void disp();		 // O(N) traversal, for debugging
+	AVL<T> split(T key);       // Changes calling tree to larger tree, returns smaller tree
+	AVL<T> add(AVL<T> tree2);  // O(LogM + LogN) calls extractMin() and mergeWithNode()
+	AVL<T> ins(T val);         // O(LogN) calls insert()
+	AVL<T> del(T val);         // O(LogN) calls delet()
+	T find(T val);             // O(LogN)
+	void disp();               // O(N) traversal, for debugging
 };
-AVL::node* AVL::rotateRight(node *n)
+template <class T>
+typename AVL<T>::node* AVL<T>::rotateRight(node *n)
 {
 	if(n == NULL || n->left == NULL)
 		return n;
@@ -62,7 +65,8 @@ AVL::node* AVL::rotateRight(node *n)
 		t->height = n->height + 1;
 	return t;
 }
-AVL::node* AVL::rotateLeft(node *n)
+template <class T>
+typename AVL<T>::node* AVL<T>::rotateLeft(node *n)
 {
 	if(n == NULL || n->right == NULL)
 		return n;
@@ -86,7 +90,8 @@ AVL::node* AVL::rotateLeft(node *n)
 		t->height = n->height + 1;
 	return t;
 }
-AVL::node* AVL::insert(node *n, TYPE val)
+template <class T>
+typename AVL<T>::node* AVL<T>::insert(node *n, T val)
 {
 	// Create and insert node
 	if(n == NULL)
@@ -106,7 +111,8 @@ AVL::node* AVL::insert(node *n, TYPE val)
 	// Recalculate heights and rotate
 	return checkHeights(n);
 }
-AVL::node* AVL::delet(node *n, TYPE val)
+template <class T>
+typename AVL<T>::node* AVL<T>::delet(node *n, T val)
 {
 	if(n == NULL)
 	{
@@ -138,7 +144,7 @@ AVL::node* AVL::delet(node *n, TYPE val)
 			node *t = n->left;
 			while(t->right != NULL)
 				t = t->right;
-			TYPE temp = n->data;
+			T temp = n->data;
 			n->data = t->data;
 			t->data = temp;
 			n->left = delet(n->left, val);
@@ -151,7 +157,8 @@ AVL::node* AVL::delet(node *n, TYPE val)
 	// Rebalance tree
 	return checkHeights(n);
 }
-AVL::node* AVL::checkHeights(node *n)
+template <class T>
+typename AVL<T>::node* AVL<T>::checkHeights(node *n)
 {
 	if(n == NULL)
 		return n;
@@ -203,25 +210,26 @@ AVL::node* AVL::checkHeights(node *n)
 }
 // Assumption: All nodes of tree2 have values
 // that are <= the smallest value in tree1
-AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
+template <class T>
+typename AVL<T>::node* AVL<T>::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 {
 	if(mergeNode == NULL)
 		return tree1;
 	if(tree1 == NULL && tree2 == NULL)
 		return mergeNode;
-    else if(tree1 == NULL)
+	else if(tree1 == NULL)
 	{
-		TYPE t = mergeNode->data;
-        insert(tree2, t);
-        delete mergeNode;
-        return tree2;
+		T t = mergeNode->data;
+		tree2 = insert(tree2, t);
+		delete mergeNode;
+		return tree2;
 	}
 	else if(tree2 == NULL)
 	{
-		TYPE t = mergeNode->data;
-        insert(tree1, t);
-        delete mergeNode;
-        return tree1;
+		T t = mergeNode->data;
+		tree1 = insert(tree1, t);
+		delete mergeNode;
+		return tree1;
 	}
 	if(tree1->height - tree2->height >= 2)
 	{
@@ -241,7 +249,8 @@ AVL::node* AVL::mergeWithNode(node *tree1, node *tree2, node *mergeNode)
 	return mergeNode;
 }
 // Get the minimum value in O(LogN)
-AVL::node* AVL::extractMin(node **tree)
+template <class T>
+typename AVL<T>::node* AVL<T>::extractMin(node **tree)
 {
 	if(tree == NULL)
 		return NULL;
@@ -264,7 +273,8 @@ AVL::node* AVL::extractMin(node **tree)
 	return t;
 }
 // Tree1 is initial tree, as well as final larger tree
-void AVL::breakTree(TYPE key, node **tree1, node **tree2)
+template <class T>
+void AVL<T>::breakTree(T key, node **tree1, node **tree2)
 {
 	if(tree1 == NULL)
 		return;
@@ -319,32 +329,35 @@ void AVL::breakTree(TYPE key, node **tree1, node **tree2)
 }
 // PUBLIC FUNCTIONS
 // Returns smaller tree
-AVL AVL::split(TYPE key)
+template <class T>
+AVL<T> AVL<T>::split(T key)
 {
 	AVL tree2;
 	breakTree(key, &root, &tree2.root);
 	return tree2;
 }
 // Assumption: Tree2 is tree with smaller keys
-AVL AVL::add(AVL tree2)
+template <class T>
+AVL<T> AVL<T>::add(AVL<T> tree2)
 {
 	node *m = extractMin(&root);
 	root = mergeWithNode(root, tree2.root, m);
 	return *this;
 }
-AVL AVL::ins(TYPE val)
+template <class T>
+AVL<T> AVL<T>::ins(T val)
 {
 	root = insert(root, val);
 	return *this;
 }
-
-AVL AVL::del(TYPE val)
+template <class T>
+AVL<T> AVL<T>::del(T val)
 {
 	root = delet(root, val);
 	return *this;
 }
-
-TYPE AVL::find(TYPE val)
+template <class T>
+T AVL<T>::find(T val)
 {
 	// Search tree until required value encountered
 	node *t = root;
@@ -361,7 +374,8 @@ TYPE AVL::find(TYPE val)
 	// Value found
 	return t->data;
 }
-void AVL::disp()
+template <class T>
+void AVL<T>::disp()
 {
 	if(root == NULL)
 	{
@@ -400,54 +414,4 @@ void AVL::disp()
 		swap(q,p);
 	}
 }
-int main()
-{
-	AVL tree1, tree2;
-	int opt = 0;
-	do
-	{
-		cout<<"1. Insert \n2. Delete \n3. Display \n4. Merge \n5. Split \n0. Exit\n";
-		cin>>opt;
-		TYPE val;
-		switch(opt)
-		{
-		case 1:
-			cin>>val;
-			tree1.ins(val);
-			break;
-		case 2:
-			cin>>val;
-			tree1.del(val);
-			break;
-		case 3:
-			tree1.disp();
-			break;
-		case 4:
-			{
-				int N;
-				cout<<"Enter number of nodes in smaller tree\n";
-				cin>>N;
-				cout<<"Enter node values\n";
-				while(N)
-				{
-					TYPE x;
-					cin>>x;
-					tree2.ins(x);
-					--N;
-				}
-				tree1.add(tree2);
-			}
-			break;
-		case 5:
-			{
-				TYPE ind;
-				cout<<"Enter key to split using\n";
-				cin>>ind;
-				tree1.split(ind).disp();
-				tree1.disp();
-			}
-			break;
-		}
-	}while(opt != 0);
-	return 0;
-}
+#endif
